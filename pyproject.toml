@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "log-cabin"
+version = "0.1.0"
+description = "a smart home data logging service for fun."
+authors = ["Kieran Wynn <5906074+KieranWynn@users.noreply.github.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+httpx = "^0.23.0"
+influxdb-client = {version = "^1.30.0", extras = ["async"]}
+pydantic = "^1.9.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
