@@ -35,7 +35,7 @@ class ObjectBase(BaseModel):
 
     @validator("readingTime", pre=True)
     def convert_ts(cls, v: int) -> dt.datetime:
-        # v is an integer in milliseconds, convert float seconds
+        # v is an integer in seconds, convert float seconds
         return helpers.epoch_seconds_to_dt(v)
 
 class EimInfo(ObjectBase):
@@ -102,7 +102,7 @@ def parse_gateway_data(d: Dict) -> GatewayData:
 
     storage = storage_d[0]
 
-    return ProductionData(
+    return GatewayData(
         system=System(inverters=inverters, storage=storage), 
         meters=Meters(
             production=Production(total=total_production), 

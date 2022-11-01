@@ -1,1 +1,2 @@
-import config, operations
+from . import config
+from . import operations

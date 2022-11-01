@@ -71,10 +71,10 @@ def make_measurement(s: str) -> str:
 
 def make_tag(k: str, v: str) -> Tuple[str, str]:
     if k in influx_tags:
-        if influx_tags[k] and v in influx_tags[k]:
-            return (k, v)
-        else: 
+        if influx_tags[k] and v not in influx_tags[k]:
             raise ValueError(f"{v} is not a valid tag value for key: '{k}'. Options are: {influx_tags[k]}")
+        else: 
+            return (k, v)
     else:
         raise ValueError(f"{k} is not a valid tag key for bucket '{influx_bucket}'. Options are: {influx_tags}")
 

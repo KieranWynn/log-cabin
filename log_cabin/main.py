@@ -96,7 +96,7 @@ def run():
     gateway_data = enphase_api.operations.get_gateway_data(gateway)
 
     consumption_data = gateway_data.meters.consumption.total
-    consumption_timestamp = dt.datetime.now()
+    consumption_timestamp = consumption_data.readingTime
     consumption_fields = {
         "w_now": consumption_data.wNow,
         "wh_today": consumption_data.whToday,
@@ -108,7 +108,7 @@ def run():
 
     
     production_data = gateway_data.meters.production.total
-    production_timestamp = dt.datetime.now()
+    production_timestamp = production_data.readingTime
     production_fields = {
         "w_now": production_data.wNow,
         "wh_today": production_data.whToday,
