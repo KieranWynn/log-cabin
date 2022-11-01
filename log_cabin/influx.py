@@ -16,7 +16,8 @@ influx_tags = {
         "main_bedroom",
         "office",
         "spare_bedroom"
-    }
+    },
+    "gateway_id": None
 }
 
 influx_fields = {
@@ -43,6 +44,22 @@ influx_fields = {
         "temp_setpoint",
         "humidity_setpoint",
         "operating_mode"
+    },
+    "electricity_consumption": {
+        "w_now",
+        "wh_today",
+        "wh_last_seven_days",
+        "wh_lifetime",
+        "rms_current",
+        "rms_voltage"
+    },
+    "electricity_generation": {
+        "w_now",
+        "wh_today",
+        "wh_last_seven_days",
+        "wh_lifetime",
+        "rms_current",
+        "rms_voltage"
     }
 }
 
@@ -54,7 +71,7 @@ def make_measurement(s: str) -> str:
 
 def make_tag(k: str, v: str) -> Tuple[str, str]:
     if k in influx_tags:
-        if v in influx_tags[k]:
+        if influx_tags[k] and v in influx_tags[k]:
             return (k, v)
         else: 
             raise ValueError(f"{v} is not a valid tag value for key: '{k}'. Options are: {influx_tags[k]}")

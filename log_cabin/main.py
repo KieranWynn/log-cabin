@@ -14,6 +14,9 @@ from daikin_api.helpers import as_float
 from influx import write_point, as_snake_case
 from timer import Timer
 
+import enphase_api
+
+
 logging.basicConfig(format='%(asctime)s %(levelname)s: %(name)s %(message)s')
 logging.getLogger().setLevel(logging.INFO)
 
@@ -40,7 +43,12 @@ def run():
                 "ip": "10.0.4.39",
                 "name": "Office"
             },
-        ]
+        ],
+        "solar_gateway": {
+            "ip": "10.0.4.53",
+            "name": "Enphase Gateway",
+            "serial_number": 122206010064
+        }
     }
 
     influx_client = influxdb_client.InfluxDBClient(
@@ -78,6 +86,42 @@ def run():
             write_point(api=write_api, measurement="aircon_state", tags={"room": as_snake_case(aircon.name)}, fields=control_fields, timestamp=control_time)
             write_point(api=write_api, measurement="aircon", tags={"room": as_snake_case(aircon.name)}, fields=dict(**sensor_fields, **control_fields), timestamp=control_time)
 
+
+    gateway_config = config.get("solar_gateway")
+    gateway = enphase_api.config.GatewayDevice(
+        ip=gateway_config["ip"], 
+        serial_number=gateway_config["serial_number"]
+    )
+
+    gateway_data = enphase_api.operations.get_gateway_data(gateway)
+
+    consumption_data = gateway_data.meters.consumption.total
+    consumption_timestamp = dt.datetime.now()
+    consumption_fields = {
+        "w_now": consumption_data.wNow,
+        "wh_today": consumption_data.whToday,
+        "wh_last_seven_days": consumption_data.whLastSevenDays,
+        "wh_lifetime": consumption_data.whLifetime,
+        "rms_current": consumption_data.rmsCurrent,
+        "rms_voltage": consumption_data.rmsVoltage,
+    }
+
+    
+    production_data = gateway_data.meters.production.total
+    production_timestamp = dt.datetime.now()
+    production_fields = {
+        "w_now": production_data.wNow,
+        "wh_today": production_data.whToday,
+        "wh_last_seven_days": production_data.whLastSevenDays,
+        "wh_lifetime": production_data.whLifetime,
+        "rms_current": production_data.rmsCurrent,
+        "rms_voltage": production_data.rmsVoltage,
+    }
+
+    with influx_client.write_api() as write_api:
+        write_point(api=write_api, measurement="electricity_consumption", tags={"gateway_id": str(gateway.serial_number)}, fields=consumption_fields, timestamp=consumption_timestamp)
+        write_point(api=write_api, measurement="electricity_generation", tags={"gateway_id": str(gateway.serial_number)}, fields=production_fields, timestamp=production_timestamp)
+            
 
 def main():
     interval_seconds = float(os.getenv("INTERVAL_SECONDS", "60"))
